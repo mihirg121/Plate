@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plate — Dish Reviews</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #0a0a0a;
+      color: #f5f5f5;
+      overflow-x: hidden;
+    }
+    
+    .serif {
+      font-family: 'Playfair Display', serif;
+    }
+    
+    /* Elegant gradient background */
+    .bg-gradient-dark {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1410 50%, #0a0a0a 100%);
+    }
+    
+    /* Gold accent color */
+    :root {
+      --gold: #d4a574;
+      --gold-light: #e8c9a0;
+      --gold-dark: #b8874f;
+    }
+    
+    /* Smooth animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+    
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+    .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+    .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+    .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--gold);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-light);
+    }
+    
+    /* Star rating styles */
+    .star {
+      cursor: pointer;
+      transition: all 0.2s ease;
+      filter: drop-shadow(0 0 2px rgba(212, 165, 116, 0.3));
+    }
+    
+    .star:hover {
+      transform: scale(1.15);
+      filter: drop-shadow(0 0 8px rgba(212, 165, 116, 0.6));
+    }
+    
+    .star.filled {
+      color: var(--gold);
+    }
+    
+    .star.empty {
+      color: #3a3a3a;
+    }
+    
+    /* Image upload preview */
+    .image-preview {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      transition: transform 0.3s ease;
+    }
+    
+    .image-preview:hover {
+      transform: scale(1.02);
+    }
+    
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Elegant card hover */
+    .dish-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(212, 165, 116, 0.1);
+    }
+    
+    .dish-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(212, 165, 116, 0.3);
+      box-shadow: 0 20px 40px rgba(212, 165, 116, 0.1);
+    }
+    
+    /* Button styles */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      color: #0a0a0a;
+      font-weight: 600;
+      padding: 12px 32px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'DM Sans', sans-serif;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(212, 165, 116, 0.3);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: var(--gold);
+      border: 2px solid var(--gold);
+      padding: 10px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+    }
+    
+    .btn-secondary:hover {
+      background: var(--gold);
+      color: #0a0a0a;
+      transform: translateY(-2px);
+    }
+    
+    /* Input styles */
+    input, textarea, select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(212, 165, 116, 0.2);
+      color: #f5f5f5;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--gold);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+    }
+    
+    input::placeholder, textarea::placeholder {
+      color: #666;
+    }
+    
+    /* Decorative elements */
+    .decorative-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 40px 0;
+    }
+    
+    /* Photo grid */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    
+    /* Modal overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      background: #1a1a1a;
+      border: 1px solid rgba(212, 165, 116, 0.3);
+      border-radius: 16px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.4s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Star Rating Component
+    function StarRating({ rating, onRatingChange, interactive = false, size = "text-2xl" }) {
+      const [hoverRating, setHoverRating] = useState(0);
+      
+      return (
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <span
+              key={star}
+              className={`star ${size} ${
+                star <= (hoverRating || rating) ? 'filled' : 'empty'
+              }`}
+              onClick={() => interactive && onRatingChange?.(star)}
+              onMouseEnter={() => interactive && setHoverRating(star)}
+              onMouseLeave={() => interactive && setHoverRating(0)}
+            >
+              ★
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    // Image Upload Component
+    function ImageUpload({ onImageSelect, currentImage }) {
+      const [preview, setPreview] = useState(currentImage || null);
+      
+      const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setPreview(reader.result);
+            onImageSelect(reader.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      
+      return (
+        <div>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+            id="image-upload"
+          />
+          <label
+            htmlFor="image-upload"
+            className="block cursor-pointer"
+          >
+            {preview ? (
+              <div className="image-preview h-64 w-full">
+                <img src={preview} alt="Preview" />
+              </div>
+            ) : (
+              <div className="h-64 border-2 border-dashed border-gray-700 rounded-xl flex items-center justify-center hover:border-gold transition-colors">
+                <div className="text-center">
+                  <div className="text-5xl mb-2">📸</div>
+                  <p className="text-gray-400">Click to upload dish photo</p>
+                </div>
+              </div>
+            )}
+          </label>
+        </div>
+      );
+    }
+
+    // Main App Component
+    function App() {
+      const [currentUser, setCurrentUser] = useState(null);
+      const [view, setView] = useState('home'); // home, login, signup, addDish, profile, dishDetail
+      const [dishes, setDishes] = useState([]);
+      const [reviews, setReviews] = useState([]);
+      const [selectedDish, setSelectedDish] = useState(null);
+      const [loading, setLoading] = useState(true);
+      
+      // Form states
+      const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+      const [signupForm, setSignupForm] = useState({ name: '', email: '', password: '' });
+      const [dishForm, setDishForm] = useState({ 
+        name: '', 
+        restaurant: '', 
+        cuisine: '', 
+        description: '',
+        image: null 
+      });
+      const [reviewForm, setReviewForm] = useState({
+        rating: 0,
+        comment: '',
+        image: null
+      });
+
+      // Load data on mount
+      useEffect(() => {
+        loadData();
+      }, []);
+
+      const loadData = async () => {
+        if (!window.storage) {
+          console.warn('Storage not available');
+          setLoading(false);
+          return;
+        }
+        
+        try {
+          // Load current user
+          try {
+            const userResult = await window.storage.get('current_user');
+            if (userResult && userResult.value) {
+              setCurrentUser(JSON.parse(userResult.value));
+            }
+          } catch (err) {
+            console.log('No current user session');
+          }
+          
+          // Load dishes
+          try {
+            const dishesResult = await window.storage.get('dishes');
+            if (dishesResult && dishesResult.value) {
+              setDishes(JSON.parse(dishesResult.value));
+            }
+          } catch (err) {
+            console.log('No dishes yet');
+          }
+          
+          // Load reviews
+          try {
+            const reviewsResult = await window.storage.get('reviews');
+            if (reviewsResult && reviewsResult.value) {
+              setReviews(JSON.parse(reviewsResult.value));
+            }
+          } catch (err) {
+            console.log('No reviews yet');
+          }
+        } catch (error) {
+          console.error('Error loading data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const handleSignup = async (e) => {
+        e.preventDefault();
+        
+        if (!window.storage) {
+          alert('Storage is not available. Please make sure you are using a supported browser.');
+          return;
+        }
+        
+        const newUser = {
+          id: Date.now().toString(),
+          name: signupForm.name,
+          email: signupForm.email,
+          password: signupForm.password,
+          joinedDate: new Date().toISOString()
+        };
+        
+        try {
+          // Get existing users
+          let users = [];
+          try {
+            const usersResult = await window.storage.get('users');
+            if (usersResult && usersResult.value) {
+              users = JSON.parse(usersResult.value);
+            }
+          } catch (err) {
+            // Users key doesn't exist yet, that's okay
+            console.log('No existing users, creating new list');
+          }
+          
+          // Check if email already exists
+          if (users.find(u => u.email === signupForm.email)) {
+            alert('An account with this email already exists. Please login instead.');
+            return;
+          }
+          
+          // Add new user
+          users.push(newUser);
+          await window.storage.set('users', JSON.stringify(users));
+          
+          // Set current user
+          await window.storage.set('current_user', JSON.stringify(newUser));
+          setCurrentUser(newUser);
+          setView('home');
+          setSignupForm({ name: '', email: '', password: '' });
+        } catch (error) {
+          console.error('Signup error:', error);
+          alert('Signup failed: ' + error.message);
+        }
+      };
+
+      const handleLogin = async (e) => {
+        e.preventDefault();
+        
+        if (!window.storage) {
+          alert('Storage is not available. Please make sure you are using a supported browser.');
+          return;
+        }
+        
+        try {
+          let users = [];
+          try {
+            const usersResult = await window.storage.get('users');
+            if (usersResult && usersResult.value) {
+              users = JSON.parse(usersResult.value);
+            }
+          } catch (err) {
+            console.log('No users found');
+          }
+          
+          if (users.length === 0) {
+            alert('No users found. Please sign up first.');
+            setView('signup');
+            return;
+          }
+          
+          const user = users.find(u => 
+            u.email === loginForm.email && u.password === loginForm.password
+          );
+          
+          if (user) {
+            await window.storage.set('current_user', JSON.stringify(user));
+            setCurrentUser(user);
+            setView('home');
+            setLoginForm({ email: '', password: '' });
+          } else {
+            alert('Invalid email or password. Please try again.');
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          alert('Login failed: ' + error.message);
+        }
+      };
+
+      const handleLogout = async () => {
+        try {
+          await window.storage.delete('current_user');
+          setCurrentUser(null);
+          setView('home');
+        } catch (error) {
+          console.error('Logout error:', error);
+        }
+      };
+
+      const handleAddDish = async (e) => {
+        e.preventDefault();
+        if (!currentUser) return;
+        
+        const newDish = {
+          id: Date.now().toString(),
+          ...dishForm,
+          addedBy: currentUser.id,
+          addedByName: currentUser.name,
+          createdAt: new Date().toISOString()
+        };
+        
+        try {
+          const updatedDishes = [...dishes, newDish];
+          await window.storage.set('dishes', JSON.stringify(updatedDishes));
+          setDishes(updatedDishes);
+          setDishForm({ name: '', restaurant: '', cuisine: '', description: '', image: null });
+          setView('home');
+        } catch (error) {
+          alert('Failed to add dish. Please try again.');
+        }
+      };
+
+      const handleAddReview = async (e) => {
+        e.preventDefault();
+        if (!currentUser || !selectedDish) return;
+        
+        const newReview = {
+          id: Date.now().toString(),
+          dishId: selectedDish.id,
+          userId: currentUser.id,
+          userName: currentUser.name,
+          rating: reviewForm.rating,
+          comment: reviewForm.comment,
+          image: reviewForm.image,
+          createdAt: new Date().toISOString()
+        };
+        
+        try {
+          const updatedReviews = [...reviews, newReview];
+          await window.storage.set('reviews', JSON.stringify(updatedReviews));
+          setReviews(updatedReviews);
+          setReviewForm({ rating: 0, comment: '', image: null });
+        } catch (error) {
+          alert('Failed to add review. Please try again.');
+        }
+      };
+
+      const getDishReviews = (dishId) => {
+        return reviews.filter(r => r.dishId === dishId);
+      };
+
+      const getAverageRating = (dishId) => {
+        const dishReviews = getDishReviews(dishId);
+        if (dishReviews.length === 0) return 0;
+        const sum = dishReviews.reduce((acc, r) => acc + r.rating, 0);
+        return (sum / dishReviews.length).toFixed(1);
+      };
+
+      const getUserReviews = (userId) => {
+        return reviews.filter(r => r.userId === userId);
+      };
+
+      if (loading) {
+        return (
+          <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-6xl mb-4 serif" style={{color: 'var(--gold)'}}>Plate</div>
+              <p className="text-gray-400">Loading...</p>
+            </div>
+          </div>
+        );
+      }
+
+      // Login View
+      if (view === 'login') {
+        return (
+          <div className="min-h-screen bg-gradient-dark flex items-center justify-center p-4">
+            <div className="bg-black bg-opacity-50 border border-opacity-20" style={{borderColor: 'var(--gold)'}} 
+                 className="rounded-2xl p-8 max-w-md w-full fade-in-up">
+              <h2 className="text-4xl serif mb-2" style={{color: 'var(--gold)'}}>Welcome Back</h2>
+              <p className="text-gray-400 mb-6">Sign in to continue reviewing</p>
+              
+              <form onSubmit={handleLogin} className="space-y-4">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={loginForm.email}
+                  onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
+                  required
+                  className="w-full"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={loginForm.password}
+                  onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                  required
+                  className="w-full"
+                />
+                <button type="submit" className="btn-primary w-full">Sign In</button>
+              </form>
+              
+              <div className="mt-6 text-center">
+                <span className="text-gray-400">Don't have an account? </span>
+                <button onClick={() => setView('signup')} className="text-gold-light hover:underline">
+                  Sign Up
+                </button>
+              </div>
+              
+              <button onClick={() => setView('home')} className="mt-4 text-gray-500 hover:text-gray-300 w-full">
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Signup View
+      if (view === 'signup') {
+        return (
+          <div className="min-h-screen bg-gradient-dark flex items-center justify-center p-4">
+            <div className="bg-black bg-opacity-50 border border-opacity-20" style={{borderColor: 'var(--gold)'}}
+                 className="rounded-2xl p-8 max-w-md w-full fade-in-up">
+              <h2 className="text-4xl serif mb-2" style={{color: 'var(--gold)'}}>Join Plate</h2>
+              <p className="text-gray-400 mb-6">Start sharing your dish discoveries</p>
+              
+              <form onSubmit={handleSignup} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={signupForm.name}
+                  onChange={(e) => setSignupForm({...signupForm, name: e.target.value})}
+                  required
+                  className="w-full"
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={signupForm.email}
+                  onChange={(e) => setSignupForm({...signupForm, email: e.target.value})}
+                  required
+                  className="w-full"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={signupForm.password}
+                  onChange={(e) => setSignupForm({...signupForm, password: e.target.value})}
+                  required
+                  className="w-full"
+                />
+                <button type="submit" className="btn-primary w-full">Create Account</button>
+              </form>
+              
+              <div className="mt-6 text-center">
+                <span className="text-gray-400">Already have an account? </span>
+                <button onClick={() => setView('login')} className="text-gold-light hover:underline">
+                  Sign In
+                </button>
+              </div>
+              
+              <button onClick={() => setView('home')} className="mt-4 text-gray-500 hover:text-gray-300 w-full">
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Add Dish View
+      if (view === 'addDish') {
+        return (
+          <div className="min-h-screen bg-gradient-dark">
+            <nav className="border-b border-gray-800 bg-black bg-opacity-50 backdrop-blur-sm sticky top-0 z-50">
+              <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+                <h1 className="text-3xl serif" style={{color: 'var(--gold)'}}>Plate</h1>
+                <button onClick={() => setView('home')} className="btn-secondary">Cancel</button>
+              </div>
+            </nav>
+            
+            <div className="max-w-3xl mx-auto px-6 py-12">
+              <h2 className="text-5xl serif mb-2 fade-in-up" style={{color: 'var(--gold)'}}>Add a Dish</h2>
+              <p className="text-gray-400 mb-8 fade-in-up stagger-1">Share a dish you love</p>
+              
+              <form onSubmit={handleAddDish} className="space-y-6">
+                <div className="fade-in-up stagger-2">
+                  <label className="block mb-2 text-sm" style={{color: 'var(--gold)'}}>Dish Photo</label>
+                  <ImageUpload 
+                    onImageSelect={(img) => setDishForm({...dishForm, image: img})}
+                    currentImage={dishForm.image}
+                  />
+                </div>
+                
+                <div className="fade-in-up stagger-3">
+                  <label className="block mb-2 text-sm" style={{color: 'var(--gold)'}}>Dish Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Truffle Carbonara"
+                    value={dishForm.name}
+                    onChange={(e) => setDishForm({...dishForm, name: e.target.value})}
+                    required
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="fade-in-up stagger-4">
+                  <label className="block mb-2 text-sm" style={{color: 'var(--gold)'}}>Restaurant *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Osteria Francescana"
+                    value={dishForm.restaurant}
+                    onChange={(e) => setDishForm({...dishForm, restaurant: e.target.value})}
+                    required
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="fade-in-up stagger-4">
+                  <label className="block mb-2 text-sm" style={{color: 'var(--gold)'}}>Cuisine Type</label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Italian, Japanese, Mexican"
+                    value={dishForm.cuisine}
+                    onChange={(e) => setDishForm({...dishForm, cuisine: e.target.value})}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="fade-in-up stagger-4">
+                  <label className="block mb-2 text-sm" style={{color: 'var(--gold)'}}>Description</label>
+                  <textarea
+                    placeholder="Tell us about this dish..."
+                    value={dishForm.description}
+                    onChange={(e) => setDishForm({...dishForm, description: e.target.value})}
+                    rows="4"
+                    className="w-full"
+                  />
+                </div>
+                
+                <button type="submit" className="btn-primary w-full fade-in-up stagger-4">
+                  Add Dish
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      }
+
+      // Profile View
+      if (view === 'profile') {
+        const userReviews = getUserReviews(currentUser.id);
+        
+        return (
+          <div className="min-h-screen bg-gradient-dark">
+            <nav className="border-b border-gray-800 bg-black bg-opacity-50 backdrop-blur-sm sticky top-0 z-50">
+              <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+                <h1 className="text-3xl serif" style={{color: 'var(--gold)'}}>Plate</h1>
+                <button onClick={() => setView('home')} className="btn-secondary">← Back</button>
+              </div>
+            </nav>
+            
+            <div className="max-w-4xl mx-auto px-6 py-12">
+              <div className="text-center mb-12 fade-in-up">
+                <div className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl"
+                     style={{background: 'linear-gradient(135deg, var(--gold-dark), var(--gold))'}}>
+                  {currentUser.name.charAt(0).toUpperCase()}
+                </div>
+                <h2 className="text-4xl serif mb-2">{currentUser.name}</h2>
+                <p className="text-gray-400">{currentUser.email}</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Member since {new Date(currentUser.joinedDate).toLocaleDateString()}
+                </p>
+              </div>
+              
+              <div className="decorative-line"></div>
+              
+              <div className="fade-in-up stagger-1">
+                <h3 className="text-3xl serif mb-6" style={{color: 'var(--gold)'}}>
+                  Your Reviews ({userReviews.length})
+                </h3>
+                
+                {userReviews.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <p className="text-xl mb-4">You haven't reviewed any dishes yet</p>
+                    <button onClick={() => setView('home')} className="btn-primary">
+                      Explore Dishes
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {userReviews.map(review => {
+                      const dish = dishes.find(d => d.id === review.dishId);
+                      return (
+                        <div key={review.id} className="bg-black bg-opacity-50 rounded-xl p-6 border border-opacity-10"
+                             style={{borderColor: 'var(--gold)'}}>
+                          <div className="flex items-start gap-4">
+                            {review.image && (
+                              <img src={review.image} alt="Review" className="w-24 h-24 object-cover rounded-lg" />
+                            )}
+                            <div className="flex-1">
+                              <h4 className="text-xl serif mb-1">{dish?.name || 'Unknown Dish'}</h4>
+                              <p className="text-sm text-gray-400 mb-2">{dish?.restaurant}</p>
+                              <StarRating rating={review.rating} size="text-lg" />
+                              <p className="mt-3 text-gray-300">{review.comment}</p>
+                              <p className="text-xs text-gray-500 mt-2">
+                                {new Date(review.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Dish Detail View
+      if (view === 'dishDetail' && selectedDish) {
+        const dishReviews = getDishReviews(selectedDish.id);
+        const avgRating = getAverageRating(selectedDish.id);
+        
+        return (
+          <div className="min-h-screen bg-gradient-dark">
+            <nav className="border-b border-gray-800 bg-black bg-opacity-50 backdrop-blur-sm sticky top-0 z-50">
+              <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+                <h1 className="text-3xl serif" style={{color: 'var(--gold)'}}>Plate</h1>
+                <button onClick={() => { setView('home'); setSelectedDish(null); }} className="btn-secondary">
+                  ← Back
+                </button>
+              </div>
+            </nav>
+            
+            <div className="max-w-4xl mx-auto px-6 py-12">
+              <div className="grid md:grid-cols-2 gap-8 mb-12">
+                <div className="fade-in-up">
+                  {selectedDish.image ? (
+                    <img src={selectedDish.image} alt={selectedDish.name} 
+                         className="w-full h-96 object-cover rounded-2xl" />
+                  ) : (
+                    <div className="w-full h-96 bg-gray-900 rounded-2xl flex items-center justify-center text-6xl">
+                      🍽️
+                    </div>
+                  )}
+                </div>
+                
+                <div className="fade-in-up stagger-1">
+                  <h2 className="text-5xl serif mb-3" style={{color: 'var(--gold)'}}>{selectedDish.name}</h2>
+                  <p className="text-xl text-gray-300 mb-4">{selectedDish.restaurant}</p>
+                  {selectedDish.cuisine && (
+                    <span className="inline-block px-4 py-1 rounded-full text-sm mb-4"
+                          style={{background: 'rgba(212, 165, 116, 0.2)', color: 'var(--gold)'}}>
+                      {selectedDish.cuisine}
+                    </span>
+                  )}
+                  
+                  <div className="flex items-center gap-4 mb-6">
+                    <StarRating rating={parseFloat(avgRating)} size="text-3xl" />
+                    <span className="text-2xl font-semibold">{avgRating}</span>
+                    <span className="text-gray-400">({dishReviews.length} reviews)</span>
+                  </div>
+                  
+                  {selectedDish.description && (
+                    <p className="text-gray-300 leading-relaxed mb-6">{selectedDish.description}</p>
+                  )}
+                  
+                  <p className="text-sm text-gray-500">
+                    Added by {selectedDish.addedByName} on {new Date(selectedDish.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="decorative-line"></div>
+              
+              {/* Add Review Form */}
+              {currentUser && (
+                <div className="mb-12 fade-in-up stagger-2">
+                  <h3 className="text-3xl serif mb-6" style={{color: 'var(--gold)'}}>Write a Review</h3>
+                  <form onSubmit={handleAddReview} className="bg-black bg-opacity-50 rounded-xl p-6 border border-opacity-10"
+                        style={{borderColor: 'var(--gold)'}}>
+                    <div className="mb-4">
+                      <label className="block mb-2 text-sm" style={{color: 'var(--gold)'}}>Your Rating *</label>
+                      <StarRating 
+                        rating={reviewForm.rating}
+                        onRatingChange={(rating) => setReviewForm({...reviewForm, rating})}
+                        interactive={true}
+                        size="text-3xl"
+                      />
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block mb-2 text-sm" style={{color: 'var(--gold)'}}>Your Review *</label>
+                      <textarea
+                        placeholder="Share your experience with this dish..."
+                        value={reviewForm.comment}
+                        onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
+                        required
+                        rows="4"
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block mb-2 text-sm" style={{color: 'var(--gold)'}}>Add Photo (Optional)</label>
+                      <ImageUpload 
+                        onImageSelect={(img) => setReviewForm({...reviewForm, image: img})}
+                        currentImage={reviewForm.image}
+                      />
+                    </div>
+                    
+                    <button type="submit" className="btn-primary" disabled={reviewForm.rating === 0}>
+                      Post Review
+                    </button>
+                  </form>
+                </div>
+              )}
+              
+              {/* Reviews List */}
+              <div className="fade-in-up stagger-3">
+                <h3 className="text-3xl serif mb-6" style={{color: 'var(--gold)'}}>
+                  All Reviews ({dishReviews.length})
+                </h3>
+                
+                {dishReviews.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    <p className="text-xl">No reviews yet. Be the first to review!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {dishReviews.map(review => (
+                      <div key={review.id} className="bg-black bg-opacity-50 rounded-xl p-6 border border-opacity-10"
+                           style={{borderColor: 'var(--gold)'}}>
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <p className="font-semibold text-lg">{review.userName}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(review.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <StarRating rating={review.rating} size="text-lg" />
+                        </div>
+                        
+                        {review.image && (
+                          <img src={review.image} alt="Review" 
+                               className="w-full h-64 object-cover rounded-lg mb-4" />
+                        )}
+                        
+                        <p className="text-gray-300 leading-relaxed">{review.comment}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Home View
+      return (
+        <div className="min-h-screen bg-gradient-dark">
+          {/* Navigation */}
+          <nav className="border-b border-gray-800 bg-black bg-opacity-50 backdrop-blur-sm sticky top-0 z-50">
+            <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+              <h1 className="text-3xl serif" style={{color: 'var(--gold)'}}>Plate</h1>
+              
+              <div className="flex items-center gap-4">
+                {currentUser ? (
+                  <>
+                    <button onClick={() => setView('addDish')} className="btn-primary">
+                      + Add Dish
+                    </button>
+                    <button onClick={() => setView('profile')} className="btn-secondary">
+                      Profile
+                    </button>
+                    <button onClick={handleLogout} className="text-gray-400 hover:text-white">
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => setView('login')} className="btn-secondary">
+                      Sign In
+                    </button>
+                    <button onClick={() => setView('signup')} className="btn-primary">
+                      Join Now
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </nav>
+
+          {/* Hero Section */}
+          <div className="max-w-6xl mx-auto px-6 py-16 text-center">
+            <h2 className="text-7xl serif mb-4 fade-in-up" style={{color: 'var(--gold)'}}>
+              Discover. Review. Savor.
+            </h2>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto fade-in-up stagger-1">
+              Share your favorite dishes and discover new culinary experiences through the eyes of fellow food lovers
+            </p>
+          </div>
+
+          <div className="decorative-line max-w-6xl mx-auto px-6"></div>
+
+          {/* Dishes Grid */}
+          <div className="max-w-6xl mx-auto px-6 py-12">
+            {dishes.length === 0 ? (
+              <div className="text-center py-20 fade-in-up">
+                <div className="text-8xl mb-6">🍽️</div>
+                <h3 className="text-3xl serif mb-4" style={{color: 'var(--gold)'}}>No dishes yet</h3>
+                <p className="text-gray-400 mb-8">Be the first to add a dish!</p>
+                {currentUser && (
+                  <button onClick={() => setView('addDish')} className="btn-primary">
+                    Add Your First Dish
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {dishes.map((dish, index) => {
+                  const avgRating = getAverageRating(dish.id);
+                  const reviewCount = getDishReviews(dish.id).length;
+                  
+                  return (
+                    <div 
+                      key={dish.id}
+                      className={`dish-card bg-black bg-opacity-50 rounded-xl overflow-hidden cursor-pointer fade-in-up stagger-${(index % 4) + 1}`}
+                      onClick={() => {
+                        setSelectedDish(dish);
+                        setView('dishDetail');
+                      }}
+                    >
+                      {dish.image ? (
+                        <img src={dish.image} alt={dish.name} className="w-full h-48 object-cover" />
+                      ) : (
+                        <div className="w-full h-48 bg-gray-900 flex items-center justify-center text-5xl">
+                          🍽️
+                        </div>
+                      )}
+                      
+                      <div className="p-6">
+                        <h3 className="text-2xl serif mb-1">{dish.name}</h3>
+                        <p className="text-gray-400 mb-3">{dish.restaurant}</p>
+                        
+                        {dish.cuisine && (
+                          <span className="inline-block px-3 py-1 rounded-full text-xs mb-3"
+                                style={{background: 'rgba(212, 165, 116, 0.2)', color: 'var(--gold)'}}>
+                            {dish.cuisine}
+                          </span>
+                        )}
+                        
+                        <div className="flex items-center gap-2 mb-3">
+                          <StarRating rating={parseFloat(avgRating)} size="text-lg" />
+                          <span className="text-sm text-gray-400">
+                            {avgRating} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+                          </span>
+                        </div>
+                        
+                        {dish.description && (
+                          <p className="text-gray-400 text-sm line-clamp-2">{dish.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <footer className="border-t border-gray-800 mt-20">
+            <div className="max-w-6xl mx-auto px-6 py-8 text-center text-gray-500">
+              <p className="serif text-2xl mb-2" style={{color: 'var(--gold)'}}>Plate</p>
+              <p className="text-sm">Every dish has a story. What's yours?</p>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
